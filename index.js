@@ -10,15 +10,29 @@ const SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
 const TOKEN_PATH = path.join(process.cwd(), 'token.json');
 const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
 
+
+/**
+ * Reads previously authorized credentials from the save file.
+ *
+ * @return {Promise<OAuth2Client|null>}
+ */
+
 async function loadSavedCredentialsIfExist() {
   try {
     const content = await fs.readFile(TOKEN_PATH);
-    const credentials = JSON.parse(content);
+    const credentials = JSON.parse(content);                   
     return google.auth.fromJSON(credentials);
   } catch (err) {
     return null;
   }
 }
+
+/**
+ * Serializes credentials to a file compatible with GoogleAUth.fromJSON.
+ *
+ * @param {OAuth2Client} client
+ * @return {Promise<void>}
+ */
 
 async function saveCredentials(client) {
   const content = await fs.readFile(CREDENTIALS_PATH);
@@ -32,6 +46,11 @@ async function saveCredentials(client) {
   });
   await fs.writeFile(TOKEN_PATH, payload);
 }
+
+/**
+ * Load or request or authorization to call APIs.
+ *
+ */
 
 async function authorize() {
   let client = await loadSavedCredentialsIfExist();
@@ -50,40 +69,54 @@ async function authorize() {
 
 async function replyToEmail(auth, message) {
     const gmail = google.gmail({ version: 'v1', auth });
-    const messageId = message.id;
+    const messageId = message.id;     // Get the full message data for the specified message ID
   
     const response = await gmail.users.messages.get({ userId: 'me', id: messageId, format: 'full' });
     const headers = response.data.payload.headers;
+    // Find the subject and from headers in the email headers
     const subjectHeader = headers.find(header => header.name.toLowerCase() === 'subject');
     const fromHeader = headers.find(header => header.name.toLowerCase() === 'from');
   
     if (!subjectHeader || !fromHeader) {
-      console.log('Invalid email format. Subject or From header is missing.');
+      console.log('Invalid email format. Subject or From header is missing.');  // Check if the subject or from header is missing
       return;
     }
-  
+   // Extract the subject and from values from the headers
     const subject = subjectHeader.value;
     const from = fromHeader.value;
-  
+
+    //Get the full thread data for the message's thread ID
     const thread = await gmail.users.threads.get({ userId: 'me', id: message.threadId });
     const messages = thread.data.messages;
+
+    //Check if the thread has more than one message
     const hasReplies = messages.length > 1;
-  
+
+
+
+    // If there are no previous replies, proceed with replying to the email
     if (!hasReplies) {
-      const messageBody = `Thank you for your email. I am currently on vacation and will respond to your message when I return. Best regards, Your Name`;
-      const raw = createReplyRaw(from, subject, messageBody);
+    const messageBody = `Thank you for your email. I am currently on vacation and will respond to your message when I return. Best 
+    regards`;
+
+    //Creates the raw reply to be send by using createReplyRaw function
+    const raw = createReplyRaw(from, subject, messageBody);
   
-      // Create the "VACATION" label if it doesn't exist
-      const labelRes = await gmail.users.labels.list({ userId: 'me' });
-      const labels = labelRes.data.labels;
-      let vacationLabel = labels.find(label => label.name === 'VACATION');
-      if (!vacationLabel) {
+    // Create the "VACATION" label if it doesn't exist
+    const labelRes = await gmail.users.labels.list({ userId: 'me' });
+    const labels = labelRes.data.labels;
+    let vacationLabel = labels.find(label => label.name === 'VACATION');
+    if (!vacationLabel) {
         const labelResponse = await gmail.users.labels.create({ userId: 'me', requestBody: { name: 'VACATION' } });
         vacationLabel = labelResponse.data;
-      }
-  
-      await gmail.users.messages.send({ userId: 'me', requestBody: { raw } });
-      await gmail.users.messages.modify({
+    }
+
+
+    //Send the reply email
+    await gmail.users.messages.send({ userId: 'me', requestBody: { raw } });
+      
+    //Move the message to label 'VACATION'
+    await gmail.users.messages.modify({
         userId: 'me',
         id: messageId,
         requestBody: {
