@@ -107,7 +107,7 @@ async function replyToEmail(auth, message) {
     const labels = labelRes.data.labels;
     let vacationLabel = labels.find(label => label.name === 'VACATION');
     if (!vacationLabel) {
-        const labelResponse = await gmail.users.labels.create({ userId: 'me', requestBody: { name: 'VACATION' } });
+        const labelResponse = await gmail.users.labels.create({ userId: 'me', requestBody: { name: 'VACATIONFUN' } });
         vacationLabel = labelResponse.data;
     }
 
