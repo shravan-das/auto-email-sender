@@ -1,7 +1,3 @@
-To generate a README file for the provided code, you can use the following template:
-
----
-
 # Gmail Auto-reply App
 
 This is a Node.js application that automates replying to emails in Gmail using the Gmail API. The application is built using Express.js framework and Google Cloud libraries.
