@@ -76,7 +76,7 @@ async function replyToEmail(auth, message) {
     // Find the subject and from headers in the email headers
     const subjectHeader = headers.find(header => header.name.toLowerCase() === 'subject');
     const fromHeader = headers.find(header => header.name.toLowerCase() === 'from');
-  
+    const forHeader = headers.find(header=> header.name.toLowerCase() === 'to');
     if (!subjectHeader || !fromHeader) {
       console.log('Invalid email format. Subject or From header is missing.');  // Check if the subject or from header is missing
       return;
@@ -84,6 +84,7 @@ async function replyToEmail(auth, message) {
    // Extract the subject and from values from the headers
     const subject = subjectHeader.value;
     const from = fromHeader.value;
+    const forh = forHeader.value; 
 
     //Get the full thread data for the message's thread ID
     const thread = await gmail.users.threads.get({ userId: 'me', id: message.threadId });
@@ -100,14 +101,14 @@ async function replyToEmail(auth, message) {
     regards`;
 
     //Creates the raw reply to be send by using createReplyRaw function
-    const raw = createReplyRaw(from, subject, messageBody);
+    const raw = createReplyRaw(forh,from, subject, messageBody);
   
     // Create the "VACATION" label if it doesn't exist
     const labelRes = await gmail.users.labels.list({ userId: 'me' });
     const labels = labelRes.data.labels;
-    let vacationLabel = labels.find(label => label.name === 'VACATION');
+    let vacationLabel = labels.find(label => label.name === 'RECREATION');
     if (!vacationLabel) {
-        const labelResponse = await gmail.users.labels.create({ userId: 'me', requestBody: { name: 'VACATIONFUN' } });
+        const labelResponse = await gmail.users.labels.create({ userId: 'me', requestBody: { name: 'RECREATION' } });
         vacationLabel = labelResponse.data;
     }
 
@@ -130,8 +131,7 @@ async function replyToEmail(auth, message) {
   
   
 
-function createReplyRaw(to, subject, messageBody) {
-  const from = 'ishravan919@gmail.com'; // Replace with your email address
+function createReplyRaw(from,to, subject, messageBody) {
   const headers = {
     To: to,
     Subject: subject,
