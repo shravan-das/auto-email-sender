@@ -4,7 +4,7 @@ This is a Node.js application that automates replying to emails in Gmail using t
 
 ## Walkthrough of the Application
 
-https://github.com/shravan-das/auto-email-sender/assets/100745475/98b316f5-e5f7-44ff-8209-cda7634cd754
+
 
 
 
