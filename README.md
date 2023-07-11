@@ -3,10 +3,7 @@
 This is a Node.js application that automates replying to emails in Gmail using the Gmail API. The application is built using Express.js framework and Google Cloud libraries.
 
 ## Walkthrough of the Application
-
-
-
-
+https://github.com/shravan-das/auto-email-sender/assets/100745475/d84dec3c-8b89-47c0-b14b-0cb2923d7ab7
 
 ## Prerequisites
 
